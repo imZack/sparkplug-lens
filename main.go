@@ -31,7 +31,7 @@ var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 func main() {
 	// mqtt.DEBUG = log.New(os.Stdout, "", 0)
 	// mqtt.ERROR = log.New(os.Stdout, "", 0)
-	brokerEndpoint := os.Getenv("MQTT_BOROKER")
+	brokerEndpoint := os.Getenv("MQTT_BROKER")
 	if brokerEndpoint == "" {
 		brokerEndpoint = "tcp://test.mosquitto.org:1883"
 		fmt.Println("Using default broker endpoint: ", brokerEndpoint)

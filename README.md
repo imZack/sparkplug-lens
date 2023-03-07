@@ -20,6 +20,10 @@ MQTT_BROKER=tcp://test.mosquitto.org:1883 ./sparkplug-lens
 
 ![screenshot](./screenshots/mqtt-sparkplug-lens.png)
 
+## Binary Download
+
+Binaries can be found at [release page](https://github.com/imZack/sparkplug-lens/releases)
+
 ## TODO
 
 - [ ] Add support for TLS and username/password authentication.
