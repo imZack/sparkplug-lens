@@ -43,7 +43,13 @@ func main() {
 		AddBroker(brokerEndpoint).
 		SetKeepAlive(30 * time.Second).
 		SetDefaultPublishHandler(f).
-		SetPingTimeout(1 * time.Second)
+		SetAutoReconnect(true).
+		SetConnectionLostHandler(func(client mqtt.Client, err error) {
+			fmt.Println("Connection lost: ", err)
+		}).
+		SetOnConnectHandler(func(client mqtt.Client) {
+			fmt.Println("Connected")
+		})
 
 	c := mqtt.NewClient(opts)
 	if token := c.Connect(); token.Wait() && token.Error() != nil {
