@@ -14,7 +14,7 @@ import (
 )
 
 var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	fmt.Printf("-------- %s --------\n", msg.Topic())
+	fmt.Printf("-------- %s -------- (%d bytes) \n", msg.Topic(), len(msg.Payload()))
 	spbPayload := &spb.Payload{}
 	if err := proto.Unmarshal(msg.Payload(), spbPayload); err != nil {
 		fmt.Println(err)
