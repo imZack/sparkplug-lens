@@ -16,21 +16,30 @@ import (
 var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	fmt.Printf("-------- %s -------- (%d bytes) \n", msg.Topic(), len(msg.Payload()))
 	spbPayload := &spb.Payload{}
-	if err := proto.Unmarshal(msg.Payload(), spbPayload); err != nil {
+	if err := proto.Unmarshal(msg.Payload(), spbPayload); err == nil {
+		if jsonString, err := prettyjson.Marshal(spbPayload); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(string(jsonString))
+		}
+		fmt.Println("======================================")
+		return
+	} else {
+		// Can't decode spb payload, try to decode as JSON Object
+		// Ignore error
+	}
+
+	// Check if msg.Payload() is a JSON string
+	if jsonString, err := prettyjson.Format(msg.Payload()); err == nil {
+		fmt.Println(string(jsonString))
+	} else {
 		fmt.Println(err)
 	}
 
-	if jsonString, err := prettyjson.Marshal(spbPayload); err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(string(jsonString))
-	}
 	fmt.Println("======================================")
 }
 
 func main() {
-	// mqtt.DEBUG = log.New(os.Stdout, "", 0)
-	// mqtt.ERROR = log.New(os.Stdout, "", 0)
 	brokerEndpoint := os.Getenv("MQTT_BROKER")
 	if brokerEndpoint == "" {
 		brokerEndpoint = "tcp://test.mosquitto.org:1883"
@@ -45,11 +54,21 @@ func main() {
 		SetDefaultPublishHandler(f).
 		SetAutoReconnect(true).
 		SetConnectionLostHandler(func(client mqtt.Client, err error) {
-			fmt.Println("Connection lost: ", err)
+			fmt.Println("[SetConnectionLostHandler] Connection lost: ", err)
 		}).
 		SetOnConnectHandler(func(client mqtt.Client) {
-			fmt.Println("Connected")
+			fmt.Println("[SetOnConnectHandler] Connected")
 		})
+
+	if os.Getenv("MQTT_USERNAME") != "" {
+		fmt.Println("Using username: ", os.Getenv("MQTT_USERNAME"))
+		opts.SetUsername(os.Getenv("MQTT_USERNAME"))
+	}
+
+	if os.Getenv("MQTT_PASSWORD") != "" {
+		fmt.Println("Using password: **********")
+		opts.SetPassword(os.Getenv("MQTT_PASSWORD"))
+	}
 
 	c := mqtt.NewClient(opts)
 	if token := c.Connect(); token.Wait() && token.Error() != nil {
